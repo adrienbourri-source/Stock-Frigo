@@ -1,0 +1,23 @@
+{
+  "name": "Le Garde-Manger",
+  "short_name": "Garde-Manger",
+  "description": "Inventaire frigo partagé de la maison",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0e14",
+  "theme_color": "#0a0e14",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='42' fill='%230a0e14'/%3E%3Ctext x='96' y='130' font-size='110' text-anchor='middle' font-family='Georgia,serif' font-style='italic' fill='%23e8b04b'%3EG%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%230a0e14'/%3E%3Ctext x='256' y='346' font-size='292' text-anchor='middle' font-family='Georgia,serif' font-style='italic' fill='%23e8b04b'%3EG%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
