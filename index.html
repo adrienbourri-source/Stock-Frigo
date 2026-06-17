@@ -79,7 +79,8 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .phrase{font-size:13px;margin-top:3px;font-weight:500;}
   .phrase.hot{color:var(--hot);}.phrase.warn{color:var(--warn);}.phrase.soon{color:var(--soon);}.phrase.ok{color:var(--ink-2);}
-  .meta{font-size:12px;color:var(--ink-3);margin-top:2px;}
+  .meta{font-size:12px;color:var(--ink-3);margin-top:3px;}
+  .meta .mk{font-weight:600;color:var(--ink-2);}
   .right{display:flex;flex-direction:column;align-items:flex-end;gap:9px;flex:none;}
   .qty-tag{font-size:12px;font-weight:600;color:var(--ink-2);background:var(--surface-2);
     padding:3px 9px;border-radius:9px;white-space:nowrap;}
@@ -136,6 +137,10 @@
   input:focus{outline:0;border-color:var(--accent);background:var(--surface);}
   input[type=date]{color-scheme:light;}
   .quick{display:flex;gap:8px;margin:-8px 0 18px;flex-wrap:wrap;}
+  .estim{font-size:12.5px;color:var(--soon);background:var(--soon-bg);border-radius:10px;
+    padding:8px 11px;margin-bottom:11px;display:none;}
+  .estim.show{display:block;}
+  .estim b{font-weight:600;}
   .chip{background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);font:inherit;font-size:13px;
     font-weight:600;padding:9px 14px;border-radius:100px;cursor:pointer;transition:.15s;}
   .chip:active{transform:scale(.93);}.chip.sel{background:var(--ink);color:var(--surface);border-color:var(--ink);}
@@ -195,7 +200,12 @@
     <div class="preview"><span class="thumb" id="pvThumb"></span><span class="ptxt" id="pvTxt">Tape un nom, on devine l'image…</span></div>
     <label>Qu'est-ce que c'est ?</label>
     <input id="fName" placeholder="Yaourts, blanc de poulet, lait…" autocomplete="off">
+    <div class="row">
+      <div><label>Date d'achat</label><input id="fBuy" type="date"></div>
+      <div><label>Quantité</label><input id="fQty" placeholder="ex : 4" autocomplete="off"></div>
+    </div>
     <label>Date limite de consommation</label>
+    <div class="estim" id="estimNote"></div>
     <div class="quick" id="quick">
       <button class="chip" data-days="2">+2 j</button>
       <button class="chip" data-days="5">+5 j</button>
@@ -203,10 +213,7 @@
       <button class="chip" data-days="14">+2 sem.</button>
       <button class="chip" data-days="30">+1 mois</button>
     </div>
-    <div class="row">
-      <div><label>Date</label><input id="fExp" type="date"></div>
-      <div><label>Quantité</label><input id="fQty" placeholder="ex : 4" autocomplete="off"></div>
-    </div>
+    <input id="fExp" type="date">
     <div class="actions">
       <button class="btn cancel" id="cancelBtn">Annuler</button>
       <button class="btn save" id="saveBtn">Ranger</button>
@@ -242,18 +249,18 @@ if(firebaseConfig.apiKey.includes("REMPLAC")){
 
 /* ---------- ILLUSTRATIONS : detection par mot-cle ---------- */
 const ICONS={
-  laitage:{bg:"#eef3f8",st:"#5a7d9a",svg:'<rect x="6" y="3" width="12" height="18" rx="2"/><path d="M6 8h12"/><path d="M9 3l1.5-1.5h3L15 3"/>'},
-  fromage:{bg:"#fbf4dd",st:"#c98a18",svg:'<path d="M3 12L19 5l2 4v8H3z"/><circle cx="8" cy="14" r="1.2"/><circle cx="13" cy="13" r="1"/>'},
-  oeuf:{bg:"#fbf4dd",st:"#c98a18",svg:'<ellipse cx="12" cy="13" rx="6" ry="8"/>'},
-  viande:{bg:"#fbe9e9",st:"#c0504a",svg:'<path d="M6 7c3-3 9-2 11 2s0 9-4 10-9-1-10-5c-.6-2 .3-3 1.5-3"/><circle cx="9" cy="9" r="1.3"/>'},
-  poisson:{bg:"#eef3f8",st:"#5a7d9a",svg:'<path d="M3 12c3-5 9-6 13-3 2-3 4-2 4-2s-1 3 0 5-1 5-1 5 0 1-3-2c-4 3-10 2-13-3z"/><circle cx="8" cy="11" r="1"/>'},
-  legume:{bg:"#e9f2ec",st:"#5a8f6b",svg:'<path d="M4 20c0-2 2-9 7-12l3 3c-3 5-10 7-12 9z" /><path d="M14 8l2-3M16 5l3-1M16 5l-1-3"/>'},
-  fruit:{bg:"#fbe9e9",st:"#c0504a",svg:'<path d="M11 7c-4-1-7 2-7 6s3 8 7 8 7-3 7-8-3-7-7-6z"/><path d="M11 7c0-2 1-4 4-4"/><path d="M11 7c0-1.5-1-2.5-2-3"/>'},
-  pain:{bg:"#fbf0e0",st:"#b07a3a",svg:'<path d="M5 11a4 4 0 0 1 14 0v7a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><path d="M9 11v8M13 11v8"/>'},
-  boisson:{bg:"#eef3f8",st:"#5a7d9a",svg:'<path d="M7 3h10l-1 5a4 4 0 0 1-8 0z"/><path d="M12 13v6M9 21h6"/>'},
-  surgele:{bg:"#eef3f8",st:"#5a7d9a",svg:'<path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19"/>'},
-  conserve:{bg:"#f1f0ea",st:"#888780",svg:'<rect x="6" y="4" width="12" height="16" rx="2"/><path d="M6 9h12M6 15h12"/>'},
-  defaut:{bg:"#f1f0ea",st:"#888780",svg:'<rect x="4" y="7" width="16" height="13" rx="2"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/>'}
+  laitage:{bg:"#eef3f8",st:"#5a7d9a",svg:'<path d="M8 8V4h8v4l1 3v8a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-8z"/><path d="M7.6 11h8.8"/>'},
+  fromage:{bg:"#fbf4dd",st:"#c98a18",svg:'<path d="M3 13l16-7 2 4v6H3z"/><path d="M3 13l18 0"/><circle cx="8" cy="15.5" r="1"/><circle cx="13" cy="15" r=".8"/>'},
+  oeuf:{bg:"#fbf4dd",st:"#c98a18",svg:'<ellipse cx="12" cy="13.5" rx="5.5" ry="7.5"/>'},
+  viande:{bg:"#fbe9e9",st:"#c0504a",svg:'<path d="M14 4a5 5 0 0 1 5 5c0 2-1 3-2.5 3.5l-6.5 6.5a2.1 2.1 0 0 1-3-3l6.5-6.5C14 8 13 7 13 5a1 1 0 0 1 1-1z"/>'},
+  poisson:{bg:"#eef3f8",st:"#5a7d9a",svg:'<path d="M3 12c4-5 11-5 14 0-3 5-10 5-14 0z"/><path d="M17 12c2-2 4-2 4-2s-1 2 0 4c0 0-2 0-4-2z"/><circle cx="8" cy="11" r="1"/>'},
+  legume:{bg:"#e9f2ec",st:"#5a8f6b",svg:'<path d="M6 18c-1 1-2 .5-2-.5s8-10 11-11c2 2 1 4 0 5L6 18z"/><path d="M15 6l1.5-2.5M16.5 7l3-1.5M14 4.5l.5-2.5"/>'},
+  fruit:{bg:"#fbe9e9",st:"#c0504a",svg:'<path d="M12 9c-1.5-1.5-5-1.5-6.5 1S5 18 8 20c2 1 3-.5 4-.5s2 1.5 4 .5c3-2 4-7 2.5-10S13.5 7.5 12 9z"/><path d="M12 9V5M12 5c1-1.5 3-1.5 4-1"/>'},
+  pain:{bg:"#fbf0e0",st:"#b07a3a",svg:'<path d="M6 8c-2 0-3 1.5-3 3s1 2 2 2v5a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-5c1 0 2-.5 2-2s-1-3-3-3z"/><path d="M9 8.5l-1 5M13 8.5l-1 5"/>'},
+  boisson:{bg:"#eef3f8",st:"#5a7d9a",svg:'<path d="M7 4h10v3a5 5 0 0 1-10 0z"/><path d="M12 12v6M9 20h6"/>'},
+  surgele:{bg:"#e8f1f6",st:"#5a7d9a",svg:'<path d="M12 3v18M4 7l16 10M20 7L4 17"/><path d="M12 3l-2 2M12 3l2 2M12 21l-2-2M12 21l2-2"/>'},
+  conserve:{bg:"#f1f0ea",st:"#888780",svg:'<rect x="6" y="5" width="12" height="15" rx="1.5"/><path d="M6 9h12M7 5l1-1h8l1 1"/>'},
+  defaut:{bg:"#f1f0ea",st:"#888780",svg:'<path d="M6 8h12l-1 11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>'}
 };
 const RULES=[
   [/lait|yaourt|yogh|skyr|cr[èe]me|beurre|fromage blanc|petit suisse|fromage frais/,"laitage"],
@@ -269,6 +276,10 @@ const RULES=[
   [/conserve|bo[îi]te|haricots? blanc|ma[ïi]s|petits pois/,"conserve"]
 ];
 function catOf(name){const n=(name||"").toLowerCase();for(const[re,cat]of RULES)if(re.test(n))return cat;return"defaut";}
+// durée de conservation estimée (jours) à partir de l'achat, par catégorie
+const SHELF={laitage:7,fromage:14,oeuf:21,viande:3,poisson:2,legume:6,fruit:7,pain:4,boisson:30,surgele:120,conserve:365,defaut:7};
+function estimDays(name){return SHELF[catOf(name)]??7;}
+function addDaysISO(baseISO,days){const d=baseISO?new Date(baseISO+"T00:00:00"):new Date();d.setDate(d.getDate()+days);return d.toISOString().slice(0,10);}
 function iconSVG(cat){const c=ICONS[cat]||ICONS.defaut;
   return `<svg viewBox="0 0 24 24" fill="none" stroke="${c.st}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${c.svg}</svg>`;}
 function thumbHTML(name){const cat=catOf(name),c=ICONS[cat]||ICONS.defaut;
@@ -314,12 +325,15 @@ function setLedger(stock){
 }
 function cardHTML(it){
   const t=tier(it);
+  const buyISO=it.buyDate||null;
+  const buyTxt=buyISO?parseD(buyISO).toLocaleDateString("fr-FR",{day:"2-digit",month:"short"}):fmtShort(it.addedAt);
+  const limTxt=it.exp?parseD(it.exp).toLocaleDateString("fr-FR",{day:"2-digit",month:"short"}):"—";
   return `<div class="card">
     ${thumbHTML(it.name)}
     <div class="body">
       <div class="name">${esc(it.name)}</div>
       <div class="phrase ${t}">${phrase(it)}</div>
-      ${it.exp?`<div class="meta">${fmtLimit(it.exp)} · ajouté ${fmtShort(it.addedAt)}</div>`:`<div class="meta">ajouté ${fmtShort(it.addedAt)}</div>`}
+      <div class="meta"><span class="mk">Acheté</span> ${buyTxt} &nbsp;·&nbsp; <span class="mk">Limite</span> ${limTxt}</div>
     </div>
     <div class="right">
       ${it.qty?`<span class="qty-tag">×${esc(it.qty)}</span>`:``}
@@ -377,24 +391,46 @@ $("tabStock").onclick=()=>{view="stock";$("tabStock").classList.add("on");$("tab
 $("tabHist").onclick=()=>{view="hist";$("tabHist").classList.add("on");$("tabStock").classList.remove("on");render();};
 
 /* ---------- sheet ---------- */
+let limitTouched=false; // l'utilisateur a-t-il fixé la limite manuellement ?
 function refreshPreview(){
   const n=$("fName").value.trim();
   $("pvThumb").outerHTML=thumbHTML(n).replace('class="thumb"','class="thumb" id="pvThumb"');
   $("pvTxt").textContent=n?`Catégorie : ${catOf(n)}`:"Tape un nom, on devine l'image…";
+  applyEstimate();
 }
-function openSheet(){$("fName").value="";$("fQty").value="";$("fExp").value="";
-  document.querySelectorAll(".chip").forEach(c=>c.classList.remove("sel"));refreshPreview();
-  $("scrim").classList.add("on");setTimeout(()=>$("fName").focus(),130);}
+function applyEstimate(){
+  const n=$("fName").value.trim();
+  const note=$("estimNote");
+  if(!n){note.classList.remove("show");return;}
+  const days=estimDays(n);
+  note.innerHTML=`Conservation estimée pour ce type : <b>${days} jour${days>1?"s":""}</b>. Modifiable ci-dessous.`;
+  note.classList.add("show");
+  if(!limitTouched){ // pré-remplit la limite depuis la date d'achat + estimation
+    $("fExp").value=addDaysISO($("fBuy").value||null,days);
+  }
+}
+function openSheet(){
+  $("fName").value="";$("fQty").value="";$("fExp").value="";
+  $("fBuy").value=new Date().toISOString().slice(0,10); // achat = aujourd'hui par défaut
+  limitTouched=false;
+  document.querySelectorAll(".chip").forEach(c=>c.classList.remove("sel"));
+  $("estimNote").classList.remove("show");
+  refreshPreview();
+  $("scrim").classList.add("on");setTimeout(()=>$("fName").focus(),130);
+}
 function closeSheet(){$("scrim").classList.remove("on");}
 $("addBtn").onclick=openSheet;$("cancelBtn").onclick=closeSheet;
 $("fName").addEventListener("input",refreshPreview);
+$("fBuy").addEventListener("input",applyEstimate); // changer l'achat recalcule l'estimation
 $("scrim").addEventListener("click",e=>{if(e.target===$("scrim"))closeSheet();});
 document.querySelectorAll(".chip").forEach(chip=>{chip.onclick=()=>{
   document.querySelectorAll(".chip").forEach(c=>c.classList.remove("sel"));chip.classList.add("sel");
-  const d=new Date();d.setDate(d.getDate()+ +chip.dataset.days);$("fExp").value=d.toISOString().slice(0,10);};});
-$("fExp").addEventListener("input",()=>document.querySelectorAll(".chip").forEach(c=>c.classList.remove("sel")));
+  limitTouched=true;
+  $("fExp").value=addDaysISO($("fBuy").value||null,+chip.dataset.days);};});
+$("fExp").addEventListener("input",()=>{limitTouched=true;document.querySelectorAll(".chip").forEach(c=>c.classList.remove("sel"));});
 $("saveBtn").onclick=()=>{const name=$("fName").value.trim();if(!name){$("fName").focus();return;}
-  addItem({name,qty:$("fQty").value.trim(),exp:$("fExp").value||"",addedAt:Date.now(),done:false});
+  const buy=$("fBuy").value||new Date().toISOString().slice(0,10);
+  addItem({name,qty:$("fQty").value.trim(),exp:$("fExp").value||"",buyDate:buy,addedAt:Date.now(),done:false});
   closeSheet();view="stock";$("tabStock").classList.add("on");$("tabHist").classList.remove("on");};
 
 /* ---------- notifications ---------- */
